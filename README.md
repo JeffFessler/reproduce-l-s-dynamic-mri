@@ -25,7 +25,7 @@ The authors also thank Ricardo Otazo
 for sharing the cardiac MRI data.
 
 Before running the code you must populate the data/ directory
-with four .mat files from
+with five .mat files from
 [http://web.eecs.umich.edu/~fessler/irt/reproduce/19/lin-19-edp/]
 
 The data is stored separately to keep the git repo light.
