@@ -1,5 +1,7 @@
 # reproduce-l-s-dynamic-mri
 
+https://github.com/JeffFessler/reproduce-l-s-dynamic-mri
+
 Matlab code for reproducing the results in the paper:
 "Efficient Dynamic Parallel MRI Reconstruction
 for the Low-Rank Plus Sparse Model,"
@@ -29,3 +31,9 @@ with five .mat files from
 [http://web.eecs.umich.edu/~fessler/irt/reproduce/19/lin-19-edp/]
 
 The data is stored separately to keep the git repo light.
+
+The following scripts are in the example folder:
+* `example_PINCAT_phantom.m` Figs. 4, 5
+* `example_abdomen_dce_ga.m` Supplement Fig. 6 (non-Cartesian)
+* `example_cardiac_cine.m` Figs. 1, 3
+* `example_cardiac_perf.m` Figs. 1, 2
