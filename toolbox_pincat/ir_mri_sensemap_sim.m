@@ -477,5 +477,5 @@ case 'test'
 	prompt
 	ir_mri_sensemap_sim_test3
 otherwise
-	fail('bad argument "%s"', varargin{1})
+	fail('bad argument "%s"', arg)
 end
