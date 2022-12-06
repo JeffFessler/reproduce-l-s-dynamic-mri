@@ -1,5 +1,6 @@
 % L+S reconstruction of undersampled multicoil cardiac perfusion MRI
 % Claire Lin, 05/20/2018
+% 2022-12-05 Jeff Fessler
 
 %% load data
 if ~isvar('kdata')
@@ -11,7 +12,7 @@ if ~isvar('kdata')
     load('../data/Xinf.mat')
     Xinf_perf = Xinf.perf;
     clear Xinf
-    [nx,ny,nt,nc] = size(kdata);
+    [nx, ny, nt, nc] = size(kdata);
 end
 
 %% normalize smap
@@ -29,6 +30,14 @@ opt.nite = 50;
 opt.samp = kdata(:,:,:,1) ~= 0;
 [opt.F, opt.C] = getFS(opt.smap, nt, 'samp', opt.samp);
 opt.E = getE(b1c, nt, 'samp', opt.samp);
+
+tmp = opt.E' * kdata; % adjoint (zero-filled) recon
+%tmp = kdata;
+%tmp(:,:,:,2:end) = 0; % 1st frame only
+%tmp(:,:,2:end,:) = 0; % 1st coil only
+%tmp = opt.E' * tmp; % adjoint (zero-filled) recon
+im(tmp)
+return
 
 % scalars to match Otazo's results
 opt.scaleL = 130/1.2775; % Otazo's stopping St(1) / b1 constant squared
