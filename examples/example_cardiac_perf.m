@@ -2,25 +2,43 @@
 % Claire Lin, 05/20/2018
 % 2022-12-05 Jeff Fessler
 
-%% load data
+%% load data (download data from web if needed)
 if ~isvar('kdata')
     clear all; close all;
     addpath('../operators')
     addpath('../algorithms')
 
-    load('../data/cardiac_perf_R8.mat')
-    load('../data/Xinf.mat')
+    url = 'https://web.eecs.umich.edu/~fessler/irt/reproduce/19/lin-19-edp/data/';
+    filename = 'cardiac_perf_R8.mat';
+    filepath = ['../data/' filename];
+    if ~exist(filepath, 'file')
+          fileurl = [url filename];
+          websave(filepath, fileurl);
+    end
+    load(filepath)
+
+    filename = 'Xinf.mat';
+    filepath = ['../data/' filename];
+    if ~exist(filepath, 'file')
+          fileurl = [url filename];
+          websave(filepath, fileurl);
+    end
+    load(filepath)
+
     Xinf_perf = Xinf.perf;
-    clear Xinf
+    clear Xinf filepath filename fileurl url
     [nx, ny, nt, nc] = size(kdata);
 end
+return
 
 %% normalize smap
 if ~isvar('b1c')
-    ssos_raw = sqrt(sum(abs((b1)).^2,3)); % nearly uniform at 1.1303
+    ssos_raw = sqrt(sum(abs(b1).^2, 3)); % nearly uniform at 1.1303
     b1c = div0(b1, ssos_raw);
-    im(b1c)
+    clear b1 % make sure to use the normalized one after this
+    jim(b1c)
 end
+return
 
 %% prepare for AL: opt
 opt.d = kdata;
