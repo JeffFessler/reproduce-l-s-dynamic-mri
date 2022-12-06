@@ -29,7 +29,7 @@ if ~isvar('kdata')
     clear Xinf filepath filename fileurl url
     [nx, ny, nt, nc] = size(kdata);
 end
-return
+
 
 %% normalize smap
 if ~isvar('b1c')
@@ -37,8 +37,9 @@ if ~isvar('b1c')
     b1c = div0(b1, ssos_raw);
     clear b1 % make sure to use the normalized one after this
     jim(b1c)
+%   extrema(@abs, sqrt(sum(abs(b1c).^2, 3))) % verify
 end
-return
+
 
 %% prepare for AL: opt
 opt.d = kdata;
@@ -49,12 +50,15 @@ opt.samp = kdata(:,:,:,1) ~= 0;
 [opt.F, opt.C] = getFS(opt.smap, nt, 'samp', opt.samp);
 opt.E = getE(b1c, nt, 'samp', opt.samp);
 
-tmp = opt.E' * kdata; % adjoint (zero-filled) recon
-%tmp = kdata;
-%tmp(:,:,:,2:end) = 0; % 1st frame only
-%tmp(:,:,2:end,:) = 0; % 1st coil only
-%tmp = opt.E' * tmp; % adjoint (zero-filled) recon
-im(tmp)
+%tmp = fftshift(opt.T * Xinf_perf, 3); % for julia check
+%tmp = opt.T' * (opt.T * Xinf_perf); extrema(@abs, tmp - Xinf_perf)
+%tmp = opt.E * Xinf_perf;
+%tmp = permute(tmp, [1 2 4 3]); % time last for julia check
+%tmp = single(opt.E' * kdata); % adjoint (zero-filled) recon
+%tmp = opt.E * Xinf_perf;
+%tmp = tmp(:)'*kdata(:) / sum(abs2(tmp(:)))
+%jim(tmp)
+%save tmp.mat tmp
 return
 
 % scalars to match Otazo's results
