@@ -25,8 +25,8 @@ if ~isvar('kdata')
     end
     load(filepath)
 
-    Xinf_perf = Xinf.perf;
-    clear Xinf filepath filename fileurl url
+    Xinf = Xinf.perf;
+    clear filepath filename fileurl url
     [nx, ny, nt, nc] = size(kdata);
 end
 
@@ -45,28 +45,27 @@ end
 opt.d = kdata;
 opt.smap = b1c;
 opt.T = getT(nx,ny,nt);
-opt.nite = 50;
+opt.nite = 10;
 opt.samp = kdata(:,:,:,1) ~= 0;
 [opt.F, opt.C] = getFS(opt.smap, nt, 'samp', opt.samp);
 opt.E = getE(b1c, nt, 'samp', opt.samp);
 
-%tmp = fftshift(opt.T * Xinf_perf, 3); % for julia check
-%tmp = opt.T' * (opt.T * Xinf_perf); extrema(@abs, tmp - Xinf_perf)
-%tmp = opt.E * Xinf_perf;
+%tmp = fftshift(opt.T * Xinf, 3); % for julia check
+%tmp = opt.T' * (opt.T * Xinf); extrema(@abs, tmp - Xinf)
+%tmp = opt.E * Xinf;
 %tmp = permute(tmp, [1 2 4 3]); % time last for julia check
 %tmp = single(opt.E' * kdata); % adjoint (zero-filled) recon
-%tmp = opt.E * Xinf_perf;
+%tmp = opt.E * Xinf;
 %tmp = tmp(:)'*kdata(:) / sum(abs2(tmp(:)))
 %jim(tmp)
 %save tmp.mat tmp
-return
 
 % scalars to match Otazo's results
 opt.scaleL = 130/1.2775; % Otazo's stopping St(1) / b1 constant squared
 opt.scaleS = 1/1.2775; % 1 / b1 constant squared
-opt.muL = 0.01;
+opt.muL = 0.01; % AL parameters
 opt.muS = 0.01 * opt.scaleS;
-opt.Xinf = Xinf_perf;
+opt.Xinf = Xinf;
 
 rerun = false;
 %rerun = true
@@ -74,13 +73,15 @@ rerun = false;
 %% AL-CG
 if ~isvar('L_cg') % || rerun
     d1 = 1/5; d2 = 1/5; % for AL-CG
-    [L_cg,S_cg,x_cg,cost_cg,time_cg,rankL_cg] = AL_CG(opt,'d1',d1,'d2',d2);
+    [L_cg, S_cg, x_cg, cost_cg, time_cg, rankL_cg] ...
+        = AL_CG(opt, 'd1', d1, 'd2', d2);
 end
 
 %% AL-2
 if ~isvar('L_al') % || rerun
     d1 = 1/5; d2 = 1/50; % for AL-2
-    [L_al,S_al,xdiff_al,cost_al,time_al,rankL_al] = AL_2(opt,'d1',d1,'d2',d2);
+    [L_al, S_al, xdiff_al, cost_al, time_al, rankL_al] = ...
+        AL_2(opt, 'd1', d1, 'd2', d2);
 end
 
 
@@ -94,35 +95,35 @@ param.scaleL = 130/1.2775;
 param.scaleS = 1/1.2775;
 param.lambda_L = 0.01;
 param.lambda_S = 0.01*param.scaleS;
-param.Xinf = reshape(Xinf_perf, nx*ny, nt);
-%return
+param.Xinf = reshape(Xinf, nx*ny, nt);
 
 %% ISTA
 if ~isvar('L_ista') || rerun
-    [L_ista,S_ista,xdiff_ista,cost_ista,time_ista,rankL_ista] = PGM(param);
+    [L_ista, S_ista, xdiff_ista, cost_ista, time_ista, rankL_ista] = PGM(param);
 end
 
 %% FISTA
 if ~isvar('L_fista') || rerun
-    [L_fista,S_fista,xdiff_fista,cost_fista,time_fista,rankL_fista] = ...
-    PGM(param,'fistaL',1,'fistaS',1);
+    [L_fista, S_fista, xdiff_fista, cost_fista, time_fista, rankL_fista] = ...
+    PGM(param, 'fistaL', 1, 'fistaS', 1);
 end
 
 %% POGM
 if ~isvar('L_pogm') || rerun
-    [L_pogm,S_pogm,xdiff_pogm,cost_pogm,time_pogm,rankL_pogm] = ...
-    PGM(param,'pogmS',1,'pogmL',1);
+    [L_pogm, S_pogm, xdiff_pogm, cost_pogm, time_pogm, rankL_pogm] = ...
+    PGM(param, 'pogmS', 1, 'pogmL', 1);
 end
 
 %% Display: 4 frames
 ix = 33:96; iy = 33:96; % roi
 it = [2 8 14 24]; % frames
 mycat = @(x) cat(2, x(:,:,1), x(:,:,2), x(:,:,3), x(:,:,4));
+myroi = @(x) mycat(x(ix,iy,it));
 L = L_pogm; S = S_pogm;
 LplusS = L + S;
-LplusSd = mycat(LplusS(ix,iy,it));
-Ld = mycat(L(ix,iy,it));
-Sd = mycat(S(ix,iy,it));
+LplusSd = myroi(LplusS);
+Ld = myroi(L);
+Sd = myroi(S);
 figure(3)
 subplot(3,1,1), imshow(abs(LplusSd), [0,1]); ylabel('L+S')
 subplot(3,1,2), imshow(abs(Ld), [0,.03]); ylabel('L')
