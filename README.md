@@ -37,3 +37,11 @@ The following scripts are in the example folder:
 * `example_abdomen_dce_ga.m` Supplement Fig. 6 (non-Cartesian)
 * `example_cardiac_cine.m` Figs. 1, 3
 * `example_cardiac_perf.m` Figs. 1, 2
+
+
+## Julia version
+
+There is a
+[Julia language version](https://juliaimagerecon.github.io/Examples/generated/mri/5-l-plus-s)
+in the
+[Examples part of JuliaImageRecon](https://github.com/JuliaImageRecon/Examples).
