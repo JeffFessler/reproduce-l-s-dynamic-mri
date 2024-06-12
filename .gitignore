@@ -1,2 +1,3 @@
 data/*.mat
+*/*.mat
 .*.swp
